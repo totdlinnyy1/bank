@@ -1,20 +1,24 @@
-import {Field, Float, Int, ObjectType} from '@nestjs/graphql'
-import {Column, Entity, PrimaryGeneratedColumn} from 'typeorm'
+import { Field, Float, Int, ObjectType } from '@nestjs/graphql'
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm'
 
-import {BaseAudit} from './base.entity'
+import { BaseAudit } from './base.entity'
+import { TransactionsEntity } from './transactions.entity'
 
 @ObjectType()
 @Entity('wallets')
 export class WalletsEntity extends BaseAudit {
+    @Field(() => Int)
+    @PrimaryGeneratedColumn()
+    id: number
 
-  @Field(() => Int)
-  @PrimaryGeneratedColumn()
-  id: number
+    @Field(() => Float)
+    @Column('float', { default: 0 })
+    money: number
 
-  @Field(() => Float)
-  @Column('numeric', {default: 0})
-  money?: number
+    @Column('boolean', { default: false })
+    isClosed?: boolean
 
-  @Column('boolean', {default: false})
-  isClosed?: boolean
+    @Field(() => [TransactionsEntity])
+    @OneToMany(() => TransactionsEntity, (transaction) => transaction.wallet)
+    transactions: TransactionsEntity[]
 }
