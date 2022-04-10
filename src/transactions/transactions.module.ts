@@ -2,10 +2,10 @@ import { forwardRef, Module } from '@nestjs/common'
 import { TypeOrmModule } from '@nestjs/typeorm'
 
 import { TransactionsEntity } from '../entities/transactions.entity'
-
-import { TransactionsService } from './transactions.service'
 import { WalletsModule } from '../wallets/wallets.module'
+
 import { TransactionsResolver } from './transactions.resolver'
+import { TransactionsService } from './transactions.service'
 
 @Module({
     imports: [

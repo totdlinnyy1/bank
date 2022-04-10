@@ -1,11 +1,11 @@
 import { Args, Int, Mutation, Query, Resolver } from '@nestjs/graphql'
 
-import { WalletsEntity } from '../entities/wallets.entity'
-
-import { WalletsService } from './wallets.service'
-import { TransactionsService } from '../transactions/transactions.service'
 import { TransactionsEntity } from '../entities/transactions.entity'
+import { WalletsEntity } from '../entities/wallets.entity'
+import { TransactionsService } from '../transactions/transactions.service'
+
 import { UpdateMoneyDto } from './dto/updateMoney.dto'
+import { WalletsService } from './wallets.service'
 
 @Resolver(() => WalletsEntity)
 export class WalletsResolver {
