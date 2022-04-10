@@ -19,10 +19,6 @@ export class TransactionsService {
         private readonly _walletService: WalletsService,
     ) {}
 
-    async save(data: CreateTransactionsDto): Promise<TransactionsEntity> {
-        return await this._transactionsRepository.save(data)
-    }
-
     // The function of creating a transaction between wallets
     async create(data: CreateTransactionsDto): Promise<TransactionsEntity> {
         await this._walletService.changeMoneyAmount({
@@ -31,7 +27,10 @@ export class TransactionsService {
         })
 
         // Saving a transaction
-        return await this.save({ type: TransactionsType.TRANSACTION, ...data })
+        return await this._transactionsRepository.save({
+            type: TransactionsType.TRANSACTION,
+            ...data,
+        })
     }
 
     // Function to receive all wallet transactions
@@ -52,6 +51,6 @@ export class TransactionsService {
             return candidate
         }
 
-        throw new Error('This wallet does not exist.')
+        throw new Error('This wallet or transaction does not exist.')
     }
 }
