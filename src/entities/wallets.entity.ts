@@ -21,4 +21,12 @@ export class WalletsEntity extends BaseAudit {
     @Field(() => [TransactionsEntity])
     @OneToMany(() => TransactionsEntity, (transaction) => transaction.wallet)
     transactions: TransactionsEntity[]
+
+    @Field(() => [TransactionsEntity], { nullable: true })
+    @OneToMany(
+        () => TransactionsEntity,
+        (transaction) => transaction.outputWallet,
+        { nullable: true },
+    )
+    inputTransactions?: TransactionsEntity[]
 }

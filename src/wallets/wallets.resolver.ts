@@ -1,18 +1,31 @@
-import { Args, Int, Mutation, Query, Resolver } from '@nestjs/graphql'
+import {
+    Args,
+    Field,
+    Float,
+    InputType,
+    Int,
+    Mutation,
+    Query,
+    Resolver,
+} from '@nestjs/graphql'
 
 import { TransactionsEntity } from '../entities/transactions.entity'
 import { WalletsEntity } from '../entities/wallets.entity'
-import { TransactionsService } from '../transactions/transactions.service'
 
-import { UpdateMoneyDto } from './dto/updateMoney.dto'
 import { WalletsService } from './wallets.service'
+
+@InputType()
+class ChangeMoneyAmount {
+    @Field(() => Int)
+    walletId!: number
+
+    @Field(() => Float)
+    money!: number
+}
 
 @Resolver(() => WalletsEntity)
 export class WalletsResolver {
-    constructor(
-        private readonly _walletsService: WalletsService,
-        private readonly _transactionsService: TransactionsService,
-    ) {}
+    constructor(private readonly _walletsService: WalletsService) {}
 
     @Query(() => [WalletsEntity])
     async wallets(): Promise<WalletsEntity[]> {
@@ -38,23 +51,23 @@ export class WalletsResolver {
 
     @Mutation(() => TransactionsEntity)
     async deposit(
-        @Args('body', { type: () => UpdateMoneyDto }) body: UpdateMoneyDto,
+        @Args('body', { type: () => ChangeMoneyAmount })
+        body: ChangeMoneyAmount,
     ): Promise<TransactionsEntity> {
-        return await this._transactionsService.create({
+        return await this._walletsService.deposit({
             walletId: body.walletId,
             money: body.money,
-            deposit: true,
         })
     }
 
     @Mutation(() => TransactionsEntity)
     async withdraw(
-        @Args('body', { type: () => UpdateMoneyDto }) body: UpdateMoneyDto,
+        @Args('body', { type: () => ChangeMoneyAmount })
+        body: ChangeMoneyAmount,
     ): Promise<TransactionsEntity> {
-        return await this._transactionsService.create({
+        return await this._walletsService.withdraw({
             walletId: body.walletId,
             money: body.money,
-            deposit: false,
         })
     }
 }

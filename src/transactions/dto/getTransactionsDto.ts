@@ -5,5 +5,5 @@ export class GetTransactionsDto {
     @Field(() => Int)
     readonly walletId: number
     @Field(() => Int)
-    readonly transactionId?: number
+    readonly transactionId: number
 }

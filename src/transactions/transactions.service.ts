@@ -2,7 +2,10 @@ import { Injectable } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'
 
-import { TransactionsEntity } from '../entities/transactions.entity'
+import {
+    TransactionsEntity,
+    TransactionsType,
+} from '../entities/transactions.entity'
 import { WalletsService } from '../wallets/wallets.service'
 
 import { CreateTransactionsDto } from './dto/createTransactions.dto'
@@ -16,31 +19,20 @@ export class TransactionsService {
         private readonly _walletService: WalletsService,
     ) {}
 
-    async create(
-        createData: CreateTransactionsDto,
-    ): Promise<TransactionsEntity> {
-        const update = await this._walletService.updateMoney({
-            walletId: createData.walletId,
-            money: createData.money,
-            deposit: createData.deposit,
-        })
-
-        if (update) {
-            return await this._transactionsRepository.save({
-                walletId: createData.walletId,
-                money: createData.money,
-            })
-        }
-
-        throw new Error('Insufficient funds on the account.')
+    async save(data: CreateTransactionsDto): Promise<TransactionsEntity> {
+        return await this._transactionsRepository.save(data)
     }
 
-    async transactions(
-        getData: GetTransactionsDto,
-    ): Promise<TransactionsEntity[]> {
-        return await this._transactionsRepository.find({
-            walletId: getData.walletId,
+    async create(data: CreateTransactionsDto): Promise<TransactionsEntity> {
+        await this._walletService.changeMoneyAmount({
+            type: TransactionsType.TRANSACTION,
+            ...data,
         })
+        return await this.save({ type: TransactionsType.TRANSACTION, ...data })
+    }
+
+    async transactions(walletId: number): Promise<TransactionsEntity[]> {
+        return await this._transactionsRepository.find({ walletId })
     }
 
     async transaction(
