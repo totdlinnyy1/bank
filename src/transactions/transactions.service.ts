@@ -23,18 +23,23 @@ export class TransactionsService {
         return await this._transactionsRepository.save(data)
     }
 
+    // The function of creating a transaction between wallets
     async create(data: CreateTransactionsDto): Promise<TransactionsEntity> {
         await this._walletService.changeMoneyAmount({
             type: TransactionsType.TRANSACTION,
             ...data,
         })
+
+        // Saving a transaction
         return await this.save({ type: TransactionsType.TRANSACTION, ...data })
     }
 
+    // Function to receive all wallet transactions
     async transactions(walletId: number): Promise<TransactionsEntity[]> {
         return await this._transactionsRepository.find({ walletId })
     }
 
+    // Function to receive one wallet transaction
     async transaction(
         getData: GetTransactionsDto,
     ): Promise<TransactionsEntity> {

@@ -30,6 +30,7 @@ class CreateTransaction {
 export class TransactionsResolver {
     constructor(private readonly _transactionsService: TransactionsService) {}
 
+    // Request to receive all wallet transactions
     @Query(() => [TransactionsEntity])
     async transactions(
         @Args('walletId', { type: () => Int }) walletId: number,
@@ -37,6 +38,7 @@ export class TransactionsResolver {
         return await this._transactionsService.transactions(walletId)
     }
 
+    // Request to receive one wallet transaction
     @Query(() => TransactionsEntity)
     async transaction(
         @Args('body', { type: () => GetTransactionsDto })
@@ -45,6 +47,7 @@ export class TransactionsResolver {
         return await this._transactionsService.transaction(body)
     }
 
+    // Mutation to transfer money between wallets
     @Mutation(() => TransactionsEntity)
     async createTransaction(
         @Args('body', { type: () => CreateTransaction })
