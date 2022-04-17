@@ -13,7 +13,7 @@ export class WalletsEntity extends BaseAudit {
 
     @Field(() => Float)
     @Column('float', { default: 0 })
-    money: number
+    balance: number
 
     @Column('boolean', { default: false })
     isClosed?: boolean

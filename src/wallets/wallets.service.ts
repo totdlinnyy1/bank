@@ -105,16 +105,16 @@ export class WalletsService {
             case TransactionsType.DEPOSIT:
                 await this._walletsRepository.update(
                     { id: data.walletId },
-                    { money: wallet.money + data.money },
+                    { balance: wallet.balance + data.money },
                 )
                 break
             // If the operation is "withdrawal", then money is withdrawn from the wallet
             case TransactionsType.WITHDRAW:
                 // Checking if there is enough money in the wallet
-                if (data.money <= wallet.money) {
+                if (data.money <= wallet.balance) {
                     await this._walletsRepository.update(
                         { id: data.walletId },
-                        { money: wallet.money - data.money },
+                        { balance: wallet.balance - data.money },
                     )
                 } else {
                     throw new Error('Insufficient funds to withdraw.')
@@ -123,17 +123,17 @@ export class WalletsService {
             // If the operation is a "transaction", then the money is transferred from one wallet to another
             case TransactionsType.TRANSACTION:
                 // Checking if there is enough money in the wallet
-                if (data.money <= wallet.money && data.outputWalletId) {
+                if (data.money <= wallet.balance && data.outputWalletId) {
                     outputWallet = await this.wallet(data.outputWalletId)
                     // Withdrawing money from the sender's wallet
                     await this._walletsRepository.update(
                         { id: data.walletId },
-                        { money: wallet.money - data.money },
+                        { balance: wallet.balance - data.money },
                     )
                     // Deposit money to the receiving wallet
                     await this._walletsRepository.update(
                         { id: data.outputWalletId },
-                        { money: outputWallet.money + data.money },
+                        { balance: outputWallet.balance + data.money },
                     )
                 } else {
                     throw new Error('Insufficient funds to transaction.')
