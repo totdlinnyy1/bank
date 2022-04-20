@@ -1,58 +1,30 @@
-import {
-    Args,
-    Field,
-    Float,
-    InputType,
-    Int,
-    Mutation,
-    Query,
-    Resolver,
-} from '@nestjs/graphql'
+import { Args, Query, Resolver } from '@nestjs/graphql'
 
-import { TransactionsEntity } from '../entities/transactions.entity'
-
-import { GetTransactionsDto } from './dto/getTransactionsDto'
+import { GetSingleTransactionDto } from './dto/getSingleTransactionDto'
+import { GetTransactionsDto } from './dto/getTransactions.dto'
+import { TransactionsObjectType } from './transactions.objectType'
 import { TransactionsService } from './transactions.service'
 
-@InputType()
-class CreateTransaction {
-    @Field(() => Int)
-    walletId: number
-
-    @Field(() => Int)
-    outputWalletId: number
-
-    @Field(() => Float)
-    money: number
-}
-
-@Resolver(() => TransactionsEntity)
+@Resolver(() => TransactionsObjectType)
 export class TransactionsResolver {
     constructor(private readonly _transactionsService: TransactionsService) {}
 
     // Request to receive all wallet transactions
-    @Query(() => [TransactionsEntity])
+    @Query(() => [TransactionsObjectType])
     async transactions(
-        @Args('walletId', { type: () => Int }) walletId: number,
-    ): Promise<TransactionsEntity[]> {
-        return await this._transactionsService.transactions(walletId)
+        @Args('getTransactionsData') getTransactionsData: GetTransactionsDto,
+    ): Promise<TransactionsObjectType[]> {
+        return await this._transactionsService.transactions(getTransactionsData)
     }
 
     // Request to receive one wallet transaction
-    @Query(() => TransactionsEntity)
+    @Query(() => TransactionsObjectType)
     async transaction(
-        @Args('body', { type: () => GetTransactionsDto })
-        body: GetTransactionsDto,
-    ): Promise<TransactionsEntity> {
-        return await this._transactionsService.transaction(body)
-    }
-
-    // Mutation to transfer money between wallets
-    @Mutation(() => TransactionsEntity)
-    async createTransaction(
-        @Args('body', { type: () => CreateTransaction })
-        body: CreateTransaction,
-    ): Promise<TransactionsEntity> {
-        return await this._transactionsService.create(body)
+        @Args('getSingleTransactionData')
+        getSingleTransactionData: GetSingleTransactionDto,
+    ): Promise<TransactionsObjectType> {
+        return await this._transactionsService.transaction(
+            getSingleTransactionData,
+        )
     }
 }

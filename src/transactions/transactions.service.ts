@@ -2,46 +2,28 @@ import { Injectable } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'
 
-import {
-    TransactionsEntity,
-    TransactionsType,
-} from '../entities/transactions.entity'
-import { WalletsService } from '../wallets/wallets.service'
-
-import { CreateTransactionsDto } from './dto/createTransactions.dto'
-import { GetTransactionsDto } from './dto/getTransactionsDto'
+import { GetSingleTransactionDto } from './dto/getSingleTransactionDto'
+import { GetTransactionsDto } from './dto/getTransactions.dto'
+import { Transactions } from './transactions.entity'
 
 @Injectable()
 export class TransactionsService {
     constructor(
-        @InjectRepository(TransactionsEntity)
-        private readonly _transactionsRepository: Repository<TransactionsEntity>,
-        private readonly _walletService: WalletsService,
+        @InjectRepository(Transactions)
+        private readonly _transactionsRepository: Repository<Transactions>,
     ) {}
 
-    // The function of creating a transaction between wallets
-    async create(data: CreateTransactionsDto): Promise<TransactionsEntity> {
-        await this._walletService.changeMoneyAmount({
-            type: TransactionsType.TRANSACTION,
-            ...data,
-        })
-
-        // Saving a transaction
-        return await this._transactionsRepository.save({
-            type: TransactionsType.TRANSACTION,
-            ...data,
-        })
-    }
-
     // Function to receive all wallet transactions
-    async transactions(walletId: number): Promise<TransactionsEntity[]> {
-        return await this._transactionsRepository.find({ walletId })
+    async transactions(
+        getTransactionsData: GetTransactionsDto,
+    ): Promise<Transactions[]> {
+        return await this._transactionsRepository.find({
+            walletId: getTransactionsData.walletId,
+        })
     }
 
     // Function to receive one wallet transaction
-    async transaction(
-        getData: GetTransactionsDto,
-    ): Promise<TransactionsEntity> {
+    async transaction(getData: GetSingleTransactionDto): Promise<Transactions> {
         const candidate = await this._transactionsRepository.findOne({
             id: getData.transactionId,
             walletId: getData.walletId,
