@@ -30,7 +30,7 @@ export class Wallet extends BaseAudit {
     @OneToMany(() => Transaction, (transaction) => transaction.wallet)
     transactions: Transaction[]
 
-    @OneToMany(() => Transaction, (transaction) => transaction.inputWallet, {
+    @OneToMany(() => Transaction, (transaction) => transaction.toWallet, {
         nullable: true,
     })
     inputTransactions?: Transaction[]

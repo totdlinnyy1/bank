@@ -6,6 +6,7 @@ import { isMoneyEnoughToWithdraw } from '../helpers/isMoneyEnoughToWithdraw'
 import { isMoneyMoreThenZero } from '../helpers/isMoneyMoreThenZero'
 import { TransactionsTypeEnum } from '../helpers/transactionsType.enum'
 import { Transaction } from '../transactions/transaction.entity'
+import { User } from '../users/user.entity'
 
 import { CloseWalletDto } from './dto/closeWallet.dto'
 import { CreateWalletDto } from './dto/createWallet.dto'
@@ -23,13 +24,25 @@ export class WalletsService {
         private readonly _walletsRepository: Repository<Wallet>,
         @InjectRepository(Transaction)
         private readonly _transactionRepository: Repository<Transaction>,
+        @InjectRepository(User)
+        private readonly _userRepository: Repository<User>,
     ) {}
 
     // The function creates a wallet
     async create(createWalletData: CreateWalletDto): Promise<Wallet> {
+        const user = await this._userRepository.findOne({
+            id: createWalletData.ownerId,
+        })
+
+        // Checking for the existence of a user
+        if (!user) {
+            throw new Error('This user does not exist')
+        }
+
         const wallet = await this._walletsRepository.save({
             ownerId: createWalletData.ownerId,
         })
+
         return await this.wallet({ walletId: wallet.id })
     }
 
@@ -52,6 +65,7 @@ export class WalletsService {
             },
         })
 
+        // Checking for the existence of a wallet
         if (!candidate) {
             throw new Error('This wallet does not exist or is closed')
         }
@@ -161,47 +175,46 @@ export class WalletsService {
 
         // Self-translation check
         if (
-            makeTransactionData.outputWalletId ===
-            makeTransactionData.inputWalletId
+            makeTransactionData.fromWalletId === makeTransactionData.toWalletId
         ) {
             throw new Error('You cannot make a transaction to yourself')
         }
 
-        const outputWallet = await this.wallet({
-            walletId: makeTransactionData.outputWalletId,
+        const fromWallet = await this.wallet({
+            walletId: makeTransactionData.fromWalletId,
         })
 
         // Checking if there is enough money on the balance
         if (
             !isMoneyEnoughToWithdraw({
-                walletBalance: outputWallet.balance,
+                walletBalance: fromWallet.balance,
                 withdrawMoney: makeTransactionData.money,
             })
         ) {
             throw new Error('Insufficient funds to transaction.')
         }
 
-        const inputWallet = await this.wallet({
-            walletId: makeTransactionData.inputWalletId,
+        const toWallet = await this.wallet({
+            walletId: makeTransactionData.toWalletId,
         })
 
         // Withdrawing money from the sender's wallet
         await this._walletsRepository.update(
-            { id: makeTransactionData.outputWalletId },
-            { balance: outputWallet.balance - makeTransactionData.money },
+            { id: makeTransactionData.fromWalletId },
+            { balance: fromWallet.balance - makeTransactionData.money },
         )
 
         // Deposit money to the receiving wallet
         await this._walletsRepository.update(
-            { id: makeTransactionData.inputWalletId },
-            { balance: inputWallet.balance + makeTransactionData.money },
+            { id: makeTransactionData.toWalletId },
+            { balance: toWallet.balance + makeTransactionData.money },
         )
 
         // Saving a transaction
         return await this._transactionRepository.save({
             type: TransactionsTypeEnum.TRANSACTION,
-            walletId: makeTransactionData.outputWalletId,
-            inputWalletId: makeTransactionData.inputWalletId,
+            walletId: makeTransactionData.fromWalletId,
+            toWalletId: makeTransactionData.toWalletId,
             money: makeTransactionData.money,
         })
     }

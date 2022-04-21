@@ -26,7 +26,7 @@ export class Transaction extends BaseAudit {
 
     @Field(() => String, { nullable: true })
     @Column({ nullable: true })
-    inputWalletId?: string
+    toWalletId?: string
 
     @ManyToOne(() => Wallet, (wallet) => wallet.transactions)
     wallet: Wallet
@@ -34,5 +34,5 @@ export class Transaction extends BaseAudit {
     @ManyToOne(() => Wallet, (wallet) => wallet.inputTransactions, {
         nullable: true,
     })
-    inputWallet?: Wallet
+    toWallet?: Wallet
 }

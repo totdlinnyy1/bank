@@ -3,10 +3,10 @@ import { Field, Float, InputType } from '@nestjs/graphql'
 @InputType()
 export class MakeTransactionDto {
     @Field(() => String)
-    readonly inputWalletId: string
+    readonly toWalletId: string
 
     @Field(() => String)
-    readonly outputWalletId: string
+    readonly fromWalletId: string
 
     @Field(() => Float)
     readonly money: number
