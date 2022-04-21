@@ -2,27 +2,27 @@ import { Args, Query, Resolver } from '@nestjs/graphql'
 
 import { GetSingleTransactionDto } from './dto/getSingleTransactionDto'
 import { GetTransactionsDto } from './dto/getTransactions.dto'
-import { TransactionsObjectType } from './transactions.objectType'
+import { TransactionObjectType } from './transaction.objectType'
 import { TransactionsService } from './transactions.service'
 
-@Resolver(() => TransactionsObjectType)
+@Resolver(() => TransactionObjectType)
 export class TransactionsResolver {
     constructor(private readonly _transactionsService: TransactionsService) {}
 
     // Request to receive all wallet transactions
-    @Query(() => [TransactionsObjectType])
+    @Query(() => [TransactionObjectType])
     async transactions(
         @Args('getTransactionsData') getTransactionsData: GetTransactionsDto,
-    ): Promise<TransactionsObjectType[]> {
+    ): Promise<TransactionObjectType[]> {
         return await this._transactionsService.transactions(getTransactionsData)
     }
 
     // Request to receive one wallet transaction
-    @Query(() => TransactionsObjectType)
+    @Query(() => TransactionObjectType)
     async transaction(
         @Args('getSingleTransactionData')
         getSingleTransactionData: GetSingleTransactionDto,
-    ): Promise<TransactionsObjectType> {
+    ): Promise<TransactionObjectType> {
         return await this._transactionsService.transaction(
             getSingleTransactionData,
         )

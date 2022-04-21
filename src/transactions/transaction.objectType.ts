@@ -3,7 +3,7 @@ import { Field, Float, ObjectType } from '@nestjs/graphql'
 import { TransactionsTypeEnum } from '../helpers/transactionsType.enum'
 
 @ObjectType()
-export class TransactionsObjectType {
+export class TransactionObjectType {
     @Field(() => String)
     id: string
 

@@ -5,32 +5,36 @@ import { Repository } from 'typeorm'
 import { isMoneyEnoughToWithdraw } from '../helpers/isMoneyEnoughToWithdraw'
 import { isMoneyMoreThenZero } from '../helpers/isMoneyMoreThenZero'
 import { TransactionsTypeEnum } from '../helpers/transactionsType.enum'
-import { Transactions } from '../transactions/transactions.entity'
+import { Transaction } from '../transactions/transaction.entity'
 
 import { CloseWalletDto } from './dto/closeWallet.dto'
+import { CreateWalletDto } from './dto/createWallet.dto'
 import { GetWalletDto } from './dto/getWallet.dto'
+import { LockWalletDto } from './dto/lockWallet.dto'
 import { MakeDepositDto } from './dto/makeDeposit.dto'
 import { MakeTransactionDto } from './dto/makeTransaction.dto'
 import { MakeWithdrawDto } from './dto/makeWithdraw.dto'
-import { Wallets } from './wallets.entity'
+import { Wallet } from './wallet.entity'
 
 @Injectable()
 export class WalletsService {
     constructor(
-        @InjectRepository(Wallets)
-        private readonly _walletsRepository: Repository<Wallets>,
-        @InjectRepository(Transactions)
-        private readonly _transactionRepository: Repository<Transactions>,
+        @InjectRepository(Wallet)
+        private readonly _walletsRepository: Repository<Wallet>,
+        @InjectRepository(Transaction)
+        private readonly _transactionRepository: Repository<Transaction>,
     ) {}
 
     // The function creates a wallet
-    async create(): Promise<Wallets> {
-        const wallet = await this._walletsRepository.save({})
+    async create(createWalletData: CreateWalletDto): Promise<Wallet> {
+        const wallet = await this._walletsRepository.save({
+            ownerId: createWalletData.ownerId,
+        })
         return await this.wallet({ walletId: wallet.id })
     }
 
     // The function will get all wallets
-    async wallets(): Promise<Wallets[]> {
+    async wallets(): Promise<Wallet[]> {
         return await this._walletsRepository.find({
             relations: ['transactions', 'inputTransactions'],
             where: { isClosed: false },
@@ -38,24 +42,27 @@ export class WalletsService {
     }
 
     // The function will get the wallet by its id
-    async wallet(getWalletData: GetWalletDto): Promise<Wallets> {
+    async wallet(getWalletData: GetWalletDto): Promise<Wallet> {
         const candidate = await this._walletsRepository.findOne({
-            relations: ['transactions', 'inputTransactions'],
-            where: { id: getWalletData.walletId, isClosed: false },
+            relations: ['transactions', 'inputTransactions', 'owner'],
+            where: {
+                id: getWalletData.walletId,
+                isClosed: false,
+                isLock: false,
+            },
         })
 
-        if (candidate) {
-            return candidate
+        if (!candidate) {
+            throw new Error('This wallet does not exist or is closed')
         }
 
-        throw new Error('This wallet does not exist or is closed.')
+        return candidate
     }
 
     // The function closes the wallet by its id
     async close(closeWalletData: CloseWalletDto): Promise<string> {
-        const candidate = await this._walletsRepository.findOne({
-            id: closeWalletData.walletId,
-            isClosed: false,
+        const candidate = await this.wallet({
+            walletId: closeWalletData.walletId,
         })
 
         if (candidate) {
@@ -69,8 +76,27 @@ export class WalletsService {
         throw new Error('This wallet does not exist or is already closed.')
     }
 
+    async lock(lockWaletData: LockWalletDto): Promise<boolean> {
+        const wallets = await this._walletsRepository.find({
+            ownerId: lockWaletData.ownerId,
+            isClosed: false,
+            isLock: false,
+        })
+
+        if (!wallets.length) {
+            return false
+        }
+
+        await this._walletsRepository.update(
+            { ownerId: lockWaletData.ownerId, isClosed: false, isLock: false },
+            { isLock: true },
+        )
+
+        return true
+    }
+
     // The function puts money in the wallet
-    async deposit(makeDepositData: MakeDepositDto): Promise<Transactions> {
+    async deposit(makeDepositData: MakeDepositDto): Promise<Transaction> {
         if (!isMoneyMoreThenZero(makeDepositData.money)) {
             throw new Error('Money must be more than 0')
         }
@@ -90,7 +116,7 @@ export class WalletsService {
     }
 
     // The function withdraws money from the wallet
-    async withdraw(makeWithdrawData: MakeWithdrawDto): Promise<Transactions> {
+    async withdraw(makeWithdrawData: MakeWithdrawDto): Promise<Transaction> {
         if (!isMoneyMoreThenZero(makeWithdrawData.money)) {
             throw new Error('Money must be more than 0')
         }
@@ -123,7 +149,7 @@ export class WalletsService {
     // The function of creating a transaction between wallets
     async transaction(
         makeTransactionData: MakeTransactionDto,
-    ): Promise<Transactions> {
+    ): Promise<Transaction> {
         if (!isMoneyMoreThenZero(makeTransactionData.money)) {
             throw new Error('Money must be more than 0')
         }

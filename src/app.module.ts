@@ -7,6 +7,7 @@ import { config } from './config/config'
 import { graphqlConfig } from './config/graphql.config'
 import { typeOrmConfig } from './config/typeorm.config'
 import { TransactionsModule } from './transactions/transactions.module'
+import { UsersModule } from './users/users.module'
 import { WalletsModule } from './wallets/wallets.module'
 
 @Module({
@@ -16,6 +17,7 @@ import { WalletsModule } from './wallets/wallets.module'
         GraphQLModule.forRoot(graphqlConfig),
         WalletsModule,
         TransactionsModule,
+        UsersModule,
     ],
 })
 export class AppModule {}

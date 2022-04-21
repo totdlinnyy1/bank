@@ -3,11 +3,11 @@ import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm'
 
 import { BaseAudit } from '../helpers/base.entity'
 import { TransactionsTypeEnum } from '../helpers/transactionsType.enum'
-import { Wallets } from '../wallets/wallets.entity'
+import { Wallet } from '../wallets/wallet.entity'
 
 @ObjectType()
 @Entity('transactions')
-export class Transactions extends BaseAudit {
+export class Transaction extends BaseAudit {
     @Field(() => String)
     @PrimaryGeneratedColumn('uuid')
     id: string
@@ -28,11 +28,11 @@ export class Transactions extends BaseAudit {
     @Column({ nullable: true })
     inputWalletId?: string
 
-    @ManyToOne(() => Wallets, (wallet) => wallet.transactions)
-    wallet: Wallets
+    @ManyToOne(() => Wallet, (wallet) => wallet.transactions)
+    wallet: Wallet
 
-    @ManyToOne(() => Wallets, (wallet) => wallet.inputTransactions, {
+    @ManyToOne(() => Wallet, (wallet) => wallet.inputTransactions, {
         nullable: true,
     })
-    inputWallet?: Wallets
+    inputWallet?: Wallet
 }

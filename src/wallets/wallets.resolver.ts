@@ -1,36 +1,39 @@
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql'
 
-import { TransactionsObjectType } from '../transactions/transactions.objectType'
+import { TransactionObjectType } from '../transactions/transaction.objectType'
 
 import { CloseWalletDto } from './dto/closeWallet.dto'
+import { CreateWalletDto } from './dto/createWallet.dto'
 import { GetWalletDto } from './dto/getWallet.dto'
 import { MakeDepositDto } from './dto/makeDeposit.dto'
 import { MakeTransactionDto } from './dto/makeTransaction.dto'
-import { WalletsObjectType } from './wallets.objectType'
+import { WalletObjectType } from './wallet.objectType'
 import { WalletsService } from './wallets.service'
 
-@Resolver(() => WalletsObjectType)
+@Resolver(() => WalletObjectType)
 export class WalletsResolver {
     constructor(private readonly _walletsService: WalletsService) {}
 
     // Request to receive all wallets
-    @Query(() => [WalletsObjectType])
-    async wallets(): Promise<WalletsObjectType[]> {
+    @Query(() => [WalletObjectType])
+    async wallets(): Promise<WalletObjectType[]> {
         return await this._walletsService.wallets()
     }
 
     // Request for a wallet by id
-    @Query(() => WalletsObjectType)
+    @Query(() => WalletObjectType)
     async wallet(
         @Args('getWalletData') getWalletData: GetWalletDto,
-    ): Promise<WalletsObjectType> {
+    ): Promise<WalletObjectType> {
         return await this._walletsService.wallet(getWalletData)
     }
 
     // Mutation to create a wallet
-    @Mutation(() => WalletsObjectType)
-    async create(): Promise<WalletsObjectType> {
-        return await this._walletsService.create()
+    @Mutation(() => WalletObjectType)
+    async createWallet(
+        @Args('createWalletData') createWalletData: CreateWalletDto,
+    ): Promise<WalletObjectType> {
+        return await this._walletsService.create(createWalletData)
     }
 
     // Mutation to close the wallet by ID
@@ -42,10 +45,10 @@ export class WalletsResolver {
     }
 
     // Deposit Mutation
-    @Mutation(() => TransactionsObjectType)
+    @Mutation(() => TransactionObjectType)
     async deposit(
         @Args('makeDepositData') makeDepositData: MakeDepositDto,
-    ): Promise<TransactionsObjectType> {
+    ): Promise<TransactionObjectType> {
         return await this._walletsService.deposit({
             walletId: makeDepositData.walletId,
             money: makeDepositData.money,
@@ -53,10 +56,10 @@ export class WalletsResolver {
     }
 
     // Withdraw Mutation
-    @Mutation(() => TransactionsObjectType)
+    @Mutation(() => TransactionObjectType)
     async withdraw(
         @Args('makeWithdrawData') makeWithdrawData: MakeDepositDto,
-    ): Promise<TransactionsObjectType> {
+    ): Promise<TransactionObjectType> {
         return await this._walletsService.withdraw({
             walletId: makeWithdrawData.walletId,
             money: makeWithdrawData.money,
@@ -64,11 +67,11 @@ export class WalletsResolver {
     }
 
     // Mutation to transfer money between wallets
-    @Mutation(() => TransactionsObjectType)
+    @Mutation(() => TransactionObjectType)
     async createTransaction(
         @Args('makeTransactionData')
         makeTransactionData: MakeTransactionDto,
-    ): Promise<TransactionsObjectType> {
+    ): Promise<TransactionObjectType> {
         return await this._walletsService.transaction(makeTransactionData)
     }
 }
