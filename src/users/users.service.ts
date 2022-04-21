@@ -18,6 +18,7 @@ export class UsersService {
         private readonly _walletsService: WalletsService,
     ) {}
 
+    // Single user get function
     async user(getUserData: GetSingleUserDto): Promise<User> {
         const candidate = await this._usersRepository.findOne({
             where: { id: getUserData.userId },
@@ -35,6 +36,7 @@ export class UsersService {
         return candidate
     }
 
+    // Users get function
     async users(): Promise<User[]> {
         return await this._usersRepository.find({
             relations: [
@@ -45,19 +47,23 @@ export class UsersService {
         })
     }
 
+    // User creation function
     async create(createUserData: CreateUserDto): Promise<User> {
         const candidate = await this._usersRepository.findOne({
             email: createUserData.email,
         })
 
+        // Checking if there is a user with the same email
         if (candidate) {
             throw new Error('This user is already exists')
         }
 
+        // Email Validation
         if (!isEmail(createUserData.email)) {
             throw new Error('Email is incorrect')
         }
 
+        // Name Validation
         if (createUserData.name === '') {
             throw new Error('Name is incorrect')
         }
@@ -67,11 +73,15 @@ export class UsersService {
         return await this.user({ userId: user.id })
     }
 
+    // The function deletes the user
     async delete(deleteUserData: DeleteUserDto): Promise<string> {
+        // Checking if such a user exists
         await this.user({ userId: deleteUserData.userId })
 
+        // Deleting a user
         await this._usersRepository.softDelete({ id: deleteUserData.userId })
 
+        // Blocking wallets, true if wallets are blocked, false if there were no wallets, or they are closed
         const isWalletsLocked = await this._walletsService.lock({
             ownerId: deleteUserData.userId,
         })

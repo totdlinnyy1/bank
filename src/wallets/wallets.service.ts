@@ -76,9 +76,10 @@ export class WalletsService {
         throw new Error('This wallet does not exist or is already closed.')
     }
 
-    async lock(lockWaletData: LockWalletDto): Promise<boolean> {
+    // The function blocks wallets
+    async lock(lockWalletData: LockWalletDto): Promise<boolean> {
         const wallets = await this._walletsRepository.find({
-            ownerId: lockWaletData.ownerId,
+            ownerId: lockWalletData.ownerId,
             isClosed: false,
             isLock: false,
         })
@@ -88,7 +89,7 @@ export class WalletsService {
         }
 
         await this._walletsRepository.update(
-            { ownerId: lockWaletData.ownerId, isClosed: false, isLock: false },
+            { ownerId: lockWalletData.ownerId, isClosed: false, isLock: false },
             { isLock: true },
         )
 
@@ -97,6 +98,7 @@ export class WalletsService {
 
     // The function puts money in the wallet
     async deposit(makeDepositData: MakeDepositDto): Promise<Transaction> {
+        // Checking the correctness of the entered money
         if (!isMoneyMoreThenZero(makeDepositData.money)) {
             throw new Error('Money must be more than 0')
         }
@@ -117,6 +119,7 @@ export class WalletsService {
 
     // The function withdraws money from the wallet
     async withdraw(makeWithdrawData: MakeWithdrawDto): Promise<Transaction> {
+        // Checking the correctness of the entered money
         if (!isMoneyMoreThenZero(makeWithdrawData.money)) {
             throw new Error('Money must be more than 0')
         }
@@ -125,6 +128,7 @@ export class WalletsService {
             walletId: makeWithdrawData.walletId,
         })
 
+        // Checking if there is enough money on the balance
         if (
             !isMoneyEnoughToWithdraw({
                 walletBalance: wallet.balance,
@@ -150,10 +154,12 @@ export class WalletsService {
     async transaction(
         makeTransactionData: MakeTransactionDto,
     ): Promise<Transaction> {
+        // Checking the correctness of the entered money
         if (!isMoneyMoreThenZero(makeTransactionData.money)) {
             throw new Error('Money must be more than 0')
         }
 
+        // Self-translation check
         if (
             makeTransactionData.outputWalletId ===
             makeTransactionData.inputWalletId
@@ -164,6 +170,8 @@ export class WalletsService {
         const outputWallet = await this.wallet({
             walletId: makeTransactionData.outputWalletId,
         })
+
+        // Checking if there is enough money on the balance
         if (
             !isMoneyEnoughToWithdraw({
                 walletBalance: outputWallet.balance,
@@ -172,6 +180,7 @@ export class WalletsService {
         ) {
             throw new Error('Insufficient funds to transaction.')
         }
+
         const inputWallet = await this.wallet({
             walletId: makeTransactionData.inputWalletId,
         })
@@ -181,6 +190,7 @@ export class WalletsService {
             { id: makeTransactionData.outputWalletId },
             { balance: outputWallet.balance - makeTransactionData.money },
         )
+
         // Deposit money to the receiving wallet
         await this._walletsRepository.update(
             { id: makeTransactionData.inputWalletId },
