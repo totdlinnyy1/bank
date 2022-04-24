@@ -1,10 +1,10 @@
 import { Args, Mutation, Resolver, Query } from '@nestjs/graphql'
 
-import { CreateUserDto } from './dto/createUser.dto'
-import { DeleteUserDto } from './dto/deleteUserDto'
-import { GetSingleUserDto } from './dto/getSingleUser.dto'
-import { UserObjectType } from './user.objectType'
+import { UserObjectType } from './graphql/user.objectType'
 import { UsersService } from './users.service'
+import { GetSingleUserInput } from './graphql/inputs/getSingleUser.input'
+import { CreateUserInput } from './graphql/inputs/createUser.input'
+import { DeleteUserInput } from './graphql/inputs/deleteUser.input'
 
 @Resolver(() => UserObjectType)
 export class UsersResolver {
@@ -13,7 +13,8 @@ export class UsersResolver {
     // Query to get a single user
     @Query(() => UserObjectType)
     async user(
-        @Args('getUserData') getUserData: GetSingleUserDto,
+        @Args('getUserData', { type: () => GetSingleUserInput })
+        getUserData: GetSingleUserInput,
     ): Promise<UserObjectType> {
         return await this._usersService.user(getUserData)
     }
@@ -27,7 +28,8 @@ export class UsersResolver {
     // Mutation to create a user
     @Mutation(() => UserObjectType)
     async createUser(
-        @Args('createUserData') createUserData: CreateUserDto,
+        @Args('createUserData', { type: () => CreateUserInput })
+        createUserData: CreateUserInput,
     ): Promise<UserObjectType> {
         return await this._usersService.create(createUserData)
     }
@@ -35,7 +37,8 @@ export class UsersResolver {
     // Mutation to delete a user
     @Mutation(() => String)
     async deleteUser(
-        @Args('deleteUserData') deleteUserData: DeleteUserDto,
+        @Args('deleteUserData', { type: () => DeleteUserInput })
+        deleteUserData: DeleteUserInput,
     ): Promise<string> {
         return await this._usersService.delete(deleteUserData)
     }

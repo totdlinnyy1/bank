@@ -3,7 +3,7 @@ import { TypeOrmModule } from '@nestjs/typeorm'
 
 import { WalletsModule } from '../wallets/wallets.module'
 
-import { User } from './user.entity'
+import { User } from './entities/user.entity'
 import { UsersResolver } from './users.resolver'
 import { UsersService } from './users.service'
 

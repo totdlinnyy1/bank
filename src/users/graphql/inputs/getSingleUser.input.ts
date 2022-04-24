@@ -1,7 +1,7 @@
 import { Field, InputType } from '@nestjs/graphql'
 
 @InputType()
-export class CreateWalletDto {
+export class GetSingleUserInput {
     @Field(() => String)
-    readonly ownerId: string
+    readonly userId: string
 }

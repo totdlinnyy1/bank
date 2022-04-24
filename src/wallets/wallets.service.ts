@@ -5,17 +5,17 @@ import { Repository } from 'typeorm'
 import { isMoneyEnoughToWithdraw } from '../helpers/isMoneyEnoughToWithdraw'
 import { isMoneyMoreThenZero } from '../helpers/isMoneyMoreThenZero'
 import { TransactionsTypeEnum } from '../helpers/transactionsType.enum'
-import { Transaction } from '../transactions/transaction.entity'
-import { User } from '../users/user.entity'
+import { Transaction } from '../transactions/entities/transaction.entity'
+import { User } from '../users/entities/user.entity'
 
-import { CloseWalletDto } from './dto/closeWallet.dto'
-import { CreateWalletDto } from './dto/createWallet.dto'
-import { GetWalletDto } from './dto/getWallet.dto'
-import { LockWalletDto } from './dto/lockWallet.dto'
-import { MakeDepositDto } from './dto/makeDeposit.dto'
-import { MakeTransactionDto } from './dto/makeTransaction.dto'
-import { MakeWithdrawDto } from './dto/makeWithdraw.dto'
-import { Wallet } from './wallet.entity'
+import { CloseWalletDto } from './dtos/closeWallet.dto'
+import { CreateWalletDto } from './dtos/createWallet.dto'
+import { GetSingleWalletDto } from './dtos/getSingleWallet.dto'
+import { LockWalletDto } from './dtos/lockWallet.dto'
+import { MakeDepositDto } from './dtos/makeDeposit.dto'
+import { MakeTransactionDto } from './dtos/makeTransaction.dto'
+import { MakeWithdrawDto } from './dtos/makeWithdraw.dto'
+import { Wallet } from './entities/wallet.entity'
 
 @Injectable()
 export class WalletsService {
@@ -55,7 +55,7 @@ export class WalletsService {
     }
 
     // The function will get the wallet by its id
-    async wallet(getWalletData: GetWalletDto): Promise<Wallet> {
+    async wallet(getWalletData: GetSingleWalletDto): Promise<Wallet> {
         const candidate = await this._walletsRepository.findOne({
             relations: ['transactions', 'inputTransactions', 'owner'],
             where: {

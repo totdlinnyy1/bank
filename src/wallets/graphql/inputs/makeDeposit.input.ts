@@ -1,7 +1,7 @@
 import { Field, Float, InputType } from '@nestjs/graphql'
 
 @InputType()
-export class MakeWithdrawDto {
+export class MakeDepositInput {
     @Field(() => String)
     readonly walletId: string
 

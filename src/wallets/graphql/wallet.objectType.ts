@@ -1,8 +1,8 @@
 import { Field, Float, ObjectType } from '@nestjs/graphql'
 
-import { Transaction } from '../transactions/transaction.entity'
-import { User } from '../users/user.entity'
-import { UserObjectType } from '../users/user.objectType'
+import { Transaction } from '../../transactions/entities/transaction.entity'
+import { User } from '../../users/entities/user.entity'
+import { UserObjectType } from '../../users/graphql/user.objectType'
 
 @ObjectType()
 export class WalletObjectType {

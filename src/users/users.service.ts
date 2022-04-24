@@ -5,10 +5,10 @@ import isEmail from 'validator/lib/isEmail'
 
 import { WalletsService } from '../wallets/wallets.service'
 
-import { CreateUserDto } from './dto/createUser.dto'
-import { DeleteUserDto } from './dto/deleteUserDto'
-import { GetSingleUserDto } from './dto/getSingleUser.dto'
-import { User } from './user.entity'
+import { CreateUserDto } from './dtos/createUser.dto'
+import { DeleteUserDto } from './dtos/deleteUserDto'
+import { GetSingleUserDto } from './dtos/getSingleUser.dto'
+import { User } from './entities/user.entity'
 
 @Injectable()
 export class UsersService {

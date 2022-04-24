@@ -6,8 +6,8 @@ import {
     PrimaryGeneratedColumn,
 } from 'typeorm'
 
-import { BaseAudit } from '../helpers/base.entity'
-import { Wallet } from '../wallets/wallet.entity'
+import { BaseAudit } from '../../helpers/base.entity'
+import { Wallet } from '../../wallets/entities/wallet.entity'
 
 @Entity('users')
 export class User extends BaseAudit {

@@ -1,6 +1,6 @@
 import { Field, Float, ObjectType } from '@nestjs/graphql'
 
-import { TransactionsTypeEnum } from '../helpers/transactionsType.enum'
+import { TransactionsTypeEnum } from '../../helpers/transactionsType.enum'
 
 @ObjectType()
 export class TransactionObjectType {

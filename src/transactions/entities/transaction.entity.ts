@@ -1,9 +1,9 @@
 import { Field, Float, ObjectType } from '@nestjs/graphql'
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm'
 
-import { BaseAudit } from '../helpers/base.entity'
-import { TransactionsTypeEnum } from '../helpers/transactionsType.enum'
-import { Wallet } from '../wallets/wallet.entity'
+import { BaseAudit } from '../../helpers/base.entity'
+import { TransactionsTypeEnum } from '../../helpers/transactionsType.enum'
+import { Wallet } from '../../wallets/entities/wallet.entity'
 
 @ObjectType()
 @Entity('transactions')

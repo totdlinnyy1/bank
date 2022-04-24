@@ -2,9 +2,9 @@ import { Injectable } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'
 
-import { GetSingleTransactionDto } from './dto/getSingleTransactionDto'
-import { GetTransactionsDto } from './dto/getTransactions.dto'
-import { Transaction } from './transaction.entity'
+import { GetSingleTransactionDto } from './dtos/getSingleTransactionDto'
+import { GetTransactionsDto } from './dtos/getTransactions.dto'
+import { Transaction } from './entities/transaction.entity'
 
 @Injectable()
 export class TransactionsService {
