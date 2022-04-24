@@ -1,8 +1,9 @@
 import { Args, Query, Resolver } from '@nestjs/graphql'
+
+import { GetSingleTransactionInput } from './graphql/inputs/getSingleTransaction.input'
+import { GetTransactionsInput } from './graphql/inputs/getTransactions.input'
 import { TransactionObjectType } from './graphql/transaction.objectType'
 import { TransactionsService } from './transactions.service'
-import { GetTransactionsInput } from './graphql/inputs/getTransactions.input'
-import { GetSingleTransactionInput } from './graphql/inputs/getSingleTransaction.input'
 
 @Resolver(() => TransactionObjectType)
 export class TransactionsResolver {

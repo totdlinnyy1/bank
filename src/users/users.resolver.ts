@@ -1,10 +1,10 @@
 import { Args, Mutation, Resolver, Query } from '@nestjs/graphql'
 
-import { UserObjectType } from './graphql/user.objectType'
-import { UsersService } from './users.service'
-import { GetSingleUserInput } from './graphql/inputs/getSingleUser.input'
 import { CreateUserInput } from './graphql/inputs/createUser.input'
 import { DeleteUserInput } from './graphql/inputs/deleteUser.input'
+import { GetSingleUserInput } from './graphql/inputs/getSingleUser.input'
+import { UserObjectType } from './graphql/user.objectType'
+import { UsersService } from './users.service'
 
 @Resolver(() => UserObjectType)
 export class UsersResolver {

@@ -17,5 +17,5 @@ export class TransactionObjectType {
     type: TransactionsTypeEnum
 
     @Field(() => String, { nullable: true })
-    inputWalletId?: string
+    toWalletId?: string
 }
