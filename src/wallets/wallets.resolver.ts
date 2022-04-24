@@ -2,14 +2,14 @@ import { Args, Mutation, Query, Resolver } from '@nestjs/graphql'
 
 import { TransactionObjectType } from '../transactions/graphql/transaction.objectType'
 
+import { CloseWalletInput } from './graphql/inputs/closeWallet.input'
+import { CreateWalletInput } from './graphql/inputs/createWallet.input'
+import { GetSingleWalletInput } from './graphql/inputs/getSingleWallet.input'
+import { MakeDepositInput } from './graphql/inputs/makeDeposit.input'
+import { MakeTransactionInput } from './graphql/inputs/makeTransaction.input'
+import { MakeWithdrawInput } from './graphql/inputs/makeWithdraw.input'
 import { WalletObjectType } from './graphql/wallet.objectType'
 import { WalletsService } from './wallets.service'
-import { GetSingleWalletInput } from './graphql/inputs/getSingleWallet.input'
-import { CreateWalletInput } from './graphql/inputs/createWallet.input'
-import { CloseWalletInput } from './graphql/inputs/closeWallet.input'
-import { MakeDepositInput } from './graphql/inputs/makeDeposit.input'
-import { MakeWithdrawInput } from './graphql/inputs/makeWithdraw.input'
-import { MakeTransactionInput } from './graphql/inputs/makeTransaction.input'
 
 @Resolver(() => WalletObjectType)
 export class WalletsResolver {
