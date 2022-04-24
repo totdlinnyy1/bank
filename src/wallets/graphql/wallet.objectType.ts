@@ -10,7 +10,13 @@ export class WalletObjectType {
     id: string
 
     @Field(() => Float)
-    balance: number
+    incoming: number
+
+    @Field(() => Float)
+    outgoing: number
+
+    @Field(() => Float)
+    actualBalance: number
 
     @Field(() => [Transaction])
     transactions: Transaction[]

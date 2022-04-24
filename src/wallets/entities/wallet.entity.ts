@@ -16,7 +16,10 @@ export class Wallet extends BaseAudit {
     id: string
 
     @Column('float', { default: 0 })
-    balance: number
+    incoming: number
+
+    @Column('float', { default: 0 })
+    outgoing: number
 
     @Column('text')
     ownerId: string
@@ -37,4 +40,8 @@ export class Wallet extends BaseAudit {
 
     @ManyToOne(() => User, (user) => user.wallets)
     owner: User
+
+    get actualBalance(): number {
+        return this.incoming - this.outgoing
+    }
 }

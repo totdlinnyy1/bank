@@ -121,7 +121,7 @@ export class WalletsService {
 
         await this._walletsRepository.update(
             { id: makeDepositData.walletId },
-            { balance: wallet.balance + makeDepositData.money },
+            { incoming: wallet.incoming + makeDepositData.money },
         )
 
         // Saving a transaction
@@ -145,7 +145,7 @@ export class WalletsService {
         // Checking if there is enough money on the balance
         if (
             !isMoneyEnoughToWithdraw({
-                walletBalance: wallet.balance,
+                walletBalance: wallet.actualBalance,
                 withdrawMoney: makeWithdrawData.money,
             })
         ) {
@@ -154,7 +154,7 @@ export class WalletsService {
 
         await this._walletsRepository.update(
             { id: makeWithdrawData.walletId },
-            { balance: wallet.balance - makeWithdrawData.money },
+            { outgoing: wallet.outgoing + makeWithdrawData.money },
         )
 
         // Saving a transaction
@@ -187,7 +187,7 @@ export class WalletsService {
         // Checking if there is enough money on the balance
         if (
             !isMoneyEnoughToWithdraw({
-                walletBalance: fromWallet.balance,
+                walletBalance: fromWallet.actualBalance,
                 withdrawMoney: makeTransactionData.money,
             })
         ) {
@@ -201,13 +201,13 @@ export class WalletsService {
         // Withdrawing money from the sender's wallet
         await this._walletsRepository.update(
             { id: makeTransactionData.fromWalletId },
-            { balance: fromWallet.balance - makeTransactionData.money },
+            { outgoing: fromWallet.outgoing + makeTransactionData.money },
         )
 
         // Deposit money to the receiving wallet
         await this._walletsRepository.update(
             { id: makeTransactionData.toWalletId },
-            { balance: toWallet.balance + makeTransactionData.money },
+            { incoming: toWallet.incoming + makeTransactionData.money },
         )
 
         // Saving a transaction
