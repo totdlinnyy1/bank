@@ -1,4 +1,5 @@
 import {
+    Check,
     Column,
     Entity,
     ManyToOne,
@@ -11,6 +12,7 @@ import { Transaction } from '../../transactions/entities/transaction.entity'
 import { User } from '../../users/entities/user.entity'
 
 @Entity('wallets')
+@Check(`"incoming" >= "outgoing"`)
 export class Wallet extends BaseAudit {
     @PrimaryGeneratedColumn('uuid')
     id: string

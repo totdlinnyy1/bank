@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
-import { Repository } from 'typeorm'
+import { Connection, Repository } from 'typeorm'
 
 import { isMoneyEnoughToWithdraw } from '../helpers/isMoneyEnoughToWithdraw'
 import { isMoneyMoreThenZero } from '../helpers/isMoneyMoreThenZero'
@@ -26,6 +26,7 @@ export class WalletsService {
         private readonly _transactionRepository: Repository<Transaction>,
         @InjectRepository(User)
         private readonly _userRepository: Repository<User>,
+        private _connection: Connection,
     ) {}
 
     // The function creates a wallet
@@ -50,7 +51,7 @@ export class WalletsService {
     async wallets(): Promise<Wallet[]> {
         return await this._walletsRepository.find({
             relations: ['transactions', 'inputTransactions'],
-            where: { isClosed: false },
+            where: { isClosed: false, isLock: false },
         })
     }
 
@@ -79,18 +80,18 @@ export class WalletsService {
             walletId: closeWalletData.walletId,
         })
 
-        if (candidate) {
-            await this._walletsRepository.update(
-                { id: closeWalletData.walletId },
-                { isClosed: true },
-            )
-            return 'The wallet is closed.'
+        if (!candidate) {
+            throw new Error('This wallet does not exist or is already closed')
         }
 
-        throw new Error('This wallet does not exist or is already closed.')
+        await this._walletsRepository.update(
+            { id: closeWalletData.walletId },
+            { isClosed: true },
+        )
+        return 'The wallet is closed'
     }
 
-    // The function blocks wallets
+    // The function locks wallets
     async lock(lockWalletData: LockWalletDto): Promise<boolean> {
         const wallets = await this._walletsRepository.find({
             ownerId: lockWalletData.ownerId,
@@ -117,12 +118,35 @@ export class WalletsService {
             throw new Error('Money must be more than 0')
         }
 
-        const wallet = await this.wallet({ walletId: makeDepositData.walletId })
+        const queryRunner = this._connection.createQueryRunner()
+        await queryRunner.connect()
+        await queryRunner.startTransaction('READ COMMITTED')
 
-        await this._walletsRepository.update(
-            { id: makeDepositData.walletId },
-            { incoming: wallet.incoming + makeDepositData.money },
-        )
+        try {
+            const wallet = await queryRunner.manager.findOne(Wallet, {
+                id: makeDepositData.walletId,
+                isClosed: false,
+                isLock: false,
+            })
+
+            // Checking for the existence of a wallet
+            if (!wallet) {
+                throw new Error('The wallet does not exist or is closed')
+            }
+
+            await queryRunner.manager.update(
+                Wallet,
+                { id: makeDepositData.walletId },
+                { incoming: () => `incoming + ${makeDepositData.money}` },
+            )
+
+            await queryRunner.commitTransaction()
+        } catch (err) {
+            await queryRunner.rollbackTransaction()
+            throw new Error(err.message)
+        } finally {
+            await queryRunner.release()
+        }
 
         // Saving a transaction
         return await this._transactionRepository.save({
@@ -138,24 +162,45 @@ export class WalletsService {
             throw new Error('Money must be more than 0')
         }
 
-        const wallet = await this.wallet({
-            walletId: makeWithdrawData.walletId,
-        })
+        const queryRunner = this._connection.createQueryRunner()
+        await queryRunner.connect()
+        await queryRunner.startTransaction('READ COMMITTED')
 
-        // Checking if there is enough money on the balance
-        if (
-            !isMoneyEnoughToWithdraw({
-                walletBalance: wallet.actualBalance,
-                withdrawMoney: makeWithdrawData.money,
+        try {
+            const wallet = await queryRunner.manager.findOne(Wallet, {
+                id: makeWithdrawData.walletId,
+                isClosed: false,
+                isLock: false,
             })
-        ) {
-            throw new Error('Insufficient funds to withdraw.')
-        }
 
-        await this._walletsRepository.update(
-            { id: makeWithdrawData.walletId },
-            { outgoing: wallet.outgoing + makeWithdrawData.money },
-        )
+            // Checking for the existence of a wallet
+            if (!wallet) {
+                throw new Error('The wallet does not exist or is closed')
+            }
+
+            // Checking if there is enough money on the balance
+            if (
+                !isMoneyEnoughToWithdraw({
+                    walletBalance: wallet.actualBalance,
+                    withdrawMoney: makeWithdrawData.money,
+                })
+            ) {
+                throw new Error('Insufficient funds to withdraw')
+            }
+
+            await queryRunner.manager.update(
+                Wallet,
+                { id: makeWithdrawData.walletId },
+                { outgoing: () => `outgoing + ${makeWithdrawData.money}` },
+            )
+
+            await queryRunner.commitTransaction()
+        } catch (err) {
+            await queryRunner.rollbackTransaction()
+            throw new Error(err.message)
+        } finally {
+            await queryRunner.release()
+        }
 
         // Saving a transaction
         return await this._transactionRepository.save({
@@ -180,35 +225,68 @@ export class WalletsService {
             throw new Error('You cannot make a transaction to yourself')
         }
 
-        const fromWallet = await this.wallet({
-            walletId: makeTransactionData.fromWalletId,
-        })
+        const queryRunner = this._connection.createQueryRunner()
+        await queryRunner.connect()
+        await queryRunner.startTransaction('READ COMMITTED')
 
-        // Checking if there is enough money on the balance
-        if (
-            !isMoneyEnoughToWithdraw({
-                walletBalance: fromWallet.actualBalance,
-                withdrawMoney: makeTransactionData.money,
+        try {
+            const fromWallet = await queryRunner.manager.findOne(Wallet, {
+                id: makeTransactionData.fromWalletId,
+                isClosed: false,
+                isLock: false,
             })
-        ) {
-            throw new Error('Insufficient funds to transaction.')
+
+            const toWallet = await queryRunner.manager.findOne(Wallet, {
+                id: makeTransactionData.toWalletId,
+                isClosed: false,
+                isLock: false,
+            })
+
+            // Checking for the existence of a wallet
+            if (!fromWallet) {
+                throw new Error(
+                    "The sender's wallet does not exist or is closed",
+                )
+            }
+
+            // Checking for the existence of a wallet
+            if (!toWallet) {
+                throw new Error(
+                    "The recipient's wallet does not exist or is closed",
+                )
+            }
+
+            // Checking if there is enough money on the balance
+            if (
+                !isMoneyEnoughToWithdraw({
+                    walletBalance: fromWallet.actualBalance,
+                    withdrawMoney: makeTransactionData.money,
+                })
+            ) {
+                throw new Error('Insufficient funds to transaction')
+            }
+
+            // Withdrawing money from the sender's wallet
+            await queryRunner.manager.update(
+                Wallet,
+                { id: makeTransactionData.fromWalletId },
+                { outgoing: () => `outgoing + ${makeTransactionData.money}` },
+            )
+
+            // Deposit money to the receiving wallet
+            await queryRunner.manager.update(
+                Wallet,
+                { id: makeTransactionData.toWalletId },
+                { incoming: () => `incoming + ${makeTransactionData.money}` },
+            )
+
+            await queryRunner.commitTransaction()
+        } catch (err) {
+            await queryRunner.rollbackTransaction()
+            throw new Error(err.message)
+        } finally {
+            await queryRunner.release()
         }
-
-        const toWallet = await this.wallet({
-            walletId: makeTransactionData.toWalletId,
-        })
-
-        // Withdrawing money from the sender's wallet
-        await this._walletsRepository.update(
-            { id: makeTransactionData.fromWalletId },
-            { outgoing: fromWallet.outgoing + makeTransactionData.money },
-        )
-
-        // Deposit money to the receiving wallet
-        await this._walletsRepository.update(
-            { id: makeTransactionData.toWalletId },
-            { incoming: toWallet.incoming + makeTransactionData.money },
-        )
 
         // Saving a transaction
         return await this._transactionRepository.save({
