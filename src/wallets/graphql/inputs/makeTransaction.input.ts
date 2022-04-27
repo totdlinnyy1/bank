@@ -1,13 +1,15 @@
 import { Field, Float, InputType } from '@nestjs/graphql'
+import { IsPositive } from 'class-validator'
 
-@InputType()
+@InputType({ description: 'Input for make transfer between wallets' })
 export class MakeTransactionInput {
-    @Field(() => String)
+    @Field(() => String, { description: "Receiver's wallet Id" })
     readonly toWalletId: string
 
-    @Field(() => String)
+    @Field(() => String, { description: "Sender's wallet Id" })
     readonly fromWalletId: string
 
-    @Field(() => Float)
+    @Field(() => Float, { description: 'Money to transfer' })
+    @IsPositive({ message: 'Money must be more than 0' })
     readonly money: number
 }

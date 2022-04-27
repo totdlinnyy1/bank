@@ -4,26 +4,26 @@ import {
     Entity,
     OneToMany,
     PrimaryGeneratedColumn,
-    Unique,
 } from 'typeorm'
 
-import { BaseAudit } from '../../helpers/base.entity'
-import { Wallet } from '../../wallets/entities/wallet.entity'
+import { BaseAudit } from '../../entities/base.entity'
+import { WalletEntity } from '../../wallets/entities/wallet.entity'
 
 @Entity('users')
-@Unique(['email'])
-export class User extends BaseAudit {
+export class UserEntity extends BaseAudit {
     @PrimaryGeneratedColumn('uuid')
     id: string
 
-    @Column('text')
+    @Column('text', { unique: true })
     email: string
 
     @Column('text')
     name: string
 
-    @OneToMany(() => Wallet, (wallets) => wallets.owner, { nullable: true })
-    wallets?: Wallet[]
+    @OneToMany(() => WalletEntity, (wallets) => wallets.owner, {
+        nullable: true,
+    })
+    wallets?: WalletEntity[]
 
     @DeleteDateColumn()
     deletedAt: Date
