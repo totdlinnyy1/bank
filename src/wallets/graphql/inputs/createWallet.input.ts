@@ -1,7 +1,7 @@
 import { Field, InputType } from '@nestjs/graphql'
 
-@InputType()
+@InputType({ description: 'Input for wallet create' })
 export class CreateWalletInput {
-    @Field(() => String)
+    @Field(() => String, { description: 'Wallet owner Id' })
     readonly ownerId: string
 }

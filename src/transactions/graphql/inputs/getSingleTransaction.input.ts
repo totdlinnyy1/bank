@@ -1,9 +1,9 @@
 import { Field, InputType } from '@nestjs/graphql'
 
-@InputType()
+@InputType({ description: 'Input for get single transaction' })
 export class GetSingleTransactionInput {
-    @Field(() => String)
+    @Field(() => String, { description: 'Wallet Id' })
     readonly walletId: string
-    @Field(() => String)
+    @Field(() => String, { description: 'Transaction Id' })
     readonly transactionId: string
 }

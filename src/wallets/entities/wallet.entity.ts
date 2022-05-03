@@ -1,4 +1,5 @@
 import {
+    Check,
     Column,
     Entity,
     ManyToOne,
@@ -6,17 +7,21 @@ import {
     PrimaryGeneratedColumn,
 } from 'typeorm'
 
-import { BaseAudit } from '../../helpers/base.entity'
-import { Transaction } from '../../transactions/entities/transaction.entity'
-import { User } from '../../users/entities/user.entity'
+import { BaseAudit } from '../../entities/base.entity'
+import { TransactionEntity } from '../../transactions/entities/transaction.entity'
+import { UserEntity } from '../../users/entities/user.entity'
 
 @Entity('wallets')
-export class Wallet extends BaseAudit {
+@Check(`"incoming" >= "outgoing"`)
+export class WalletEntity extends BaseAudit {
     @PrimaryGeneratedColumn('uuid')
     id: string
 
     @Column('float', { default: 0 })
-    balance: number
+    incoming: number
+
+    @Column('float', { default: 0 })
+    outgoing: number
 
     @Column('text')
     ownerId: string
@@ -27,14 +32,18 @@ export class Wallet extends BaseAudit {
     @Column('boolean', { default: false })
     isLock?: boolean
 
-    @OneToMany(() => Transaction, (transaction) => transaction.wallet)
-    transactions: Transaction[]
+    @OneToMany(() => TransactionEntity, (transaction) => transaction.wallet)
+    transactions: TransactionEntity[]
 
-    @OneToMany(() => Transaction, (transaction) => transaction.toWallet, {
+    @OneToMany(() => TransactionEntity, (transaction) => transaction.toWallet, {
         nullable: true,
     })
-    inputTransactions?: Transaction[]
+    inputTransactions?: TransactionEntity[]
 
-    @ManyToOne(() => User, (user) => user.wallets)
-    owner: User
+    @ManyToOne(() => UserEntity, (user) => user.wallets)
+    owner: UserEntity
+
+    get actualBalance(): number {
+        return this.incoming - this.outgoing
+    }
 }
