@@ -1,4 +1,4 @@
-import { UsePipes, ValidationPipe } from '@nestjs/common'
+import { Logger, UsePipes, ValidationPipe } from '@nestjs/common'
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql'
 
 import { TransactionObjectType } from '../transactions/graphql/transaction.object-type'
@@ -11,11 +11,14 @@ import { WalletsService } from './wallets.service'
 
 @Resolver(() => WalletObjectType)
 export class WalletsResolver {
+    private readonly _logger: Logger = new Logger(WalletsResolver.name)
+
     constructor(private readonly _walletsService: WalletsService) {}
 
     // Request to receive all wallets
     @Query(() => [WalletObjectType])
     async wallets(): Promise<WalletObjectType[]> {
+        this._logger.debug('GET WALLETS')
         return await this._walletsService.wallets()
     }
 
@@ -25,6 +28,7 @@ export class WalletsResolver {
         @Args('id', { type: () => String })
         id: string,
     ): Promise<WalletObjectType> {
+        this._logger.debug('GET WALLET BY ID')
         return await this._walletsService.wallet(id)
     }
 
@@ -34,6 +38,8 @@ export class WalletsResolver {
         @Args('createWalletData', { type: () => CreateWalletInput })
         createWalletData: CreateWalletInput,
     ): Promise<WalletObjectType> {
+        this._logger.debug('CREATE WALLET')
+        this._logger.debug({ createWalletData })
         return await this._walletsService.create(createWalletData)
     }
 
@@ -43,6 +49,8 @@ export class WalletsResolver {
         @Args('id', { type: () => String })
         id: string,
     ): Promise<string> {
+        this._logger.debug('CLOSE WALLET')
+        this._logger.debug(id)
         return await this._walletsService.close(id)
     }
 
@@ -53,6 +61,8 @@ export class WalletsResolver {
         @Args('makeDepositData', { type: () => DepositOrWithdrawInput })
         makeDepositData: DepositOrWithdrawInput,
     ): Promise<TransactionObjectType> {
+        this._logger.debug('MAKE DEPOSIT')
+        this._logger.debug({ makeDepositData })
         return await this._walletsService.deposit(makeDepositData)
     }
 
@@ -63,6 +73,8 @@ export class WalletsResolver {
         @Args('makeWithdrawData', { type: () => DepositOrWithdrawInput })
         makeWithdrawData: DepositOrWithdrawInput,
     ): Promise<TransactionObjectType> {
+        this._logger.debug('MAKE WITHDRAW')
+        this._logger.debug({ makeWithdrawData })
         return await this._walletsService.withdraw(makeWithdrawData)
     }
 
@@ -73,6 +85,8 @@ export class WalletsResolver {
         @Args('makeTransactionData', { type: () => MakeTransactionInput })
         makeTransactionData: MakeTransactionInput,
     ): Promise<TransactionObjectType> {
+        this._logger.debug('MAKE TRANSACTION')
+        this._logger.debug({ makeTransactionData })
         return await this._walletsService.transaction(makeTransactionData)
     }
 }

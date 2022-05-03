@@ -60,7 +60,8 @@
         "reflect-metadata": "^0.1.13",
         "rimraf": "^3.0.2",
         "rxjs": "^6.5.4",
-        "typeorm": "^0.2.31"
+        "typeorm": "^0.2.31",
+        "uuid": "^8.3.2"
     },
     "devDependencies": {
         "@commitlint/cli": "^12.1.4",
