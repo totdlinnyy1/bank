@@ -152,7 +152,7 @@ export class WalletsService {
         this._logger.debug('START TRANSACTION')
         const queryRunner = this._connection.createQueryRunner()
         await queryRunner.connect()
-        await queryRunner.startTransaction('READ COMMITTED')
+        await queryRunner.startTransaction('SERIALIZABLE')
 
         try {
             this._logger.debug('CHECK IF WALLET EXIST')
@@ -213,7 +213,7 @@ export class WalletsService {
         this._logger.debug('START DATABASE TRANSACTION')
         const queryRunner = this._connection.createQueryRunner()
         await queryRunner.connect()
-        await queryRunner.startTransaction('READ COMMITTED')
+        await queryRunner.startTransaction('SERIALIZABLE')
 
         try {
             this._logger.debug('CHECK IF WALLET EXIST')
@@ -296,7 +296,7 @@ export class WalletsService {
         this._logger.debug('START DATABASE TRANSACTION')
         const queryRunner = this._connection.createQueryRunner()
         await queryRunner.connect()
-        await queryRunner.startTransaction('READ COMMITTED')
+        await queryRunner.startTransaction('SERIALIZABLE')
 
         try {
             this._logger.debug('CHECK IF FROM_WALLET EXIST')
